@@ -56,13 +56,16 @@ io.on(enums.socketEvents.CONNECTION, (socket) => {
         let newGame = new Game();
         newGame.players.push(socket);
         games.push(newGame);
-        socket.emit(enums.socketEvents.CREATED,"Waiting for opponent");
+        socket.emit(enums.socketEvents.CREATED,{msg:"Waiting for opponent",playerID:0});
     }
     else {//join existing game
         let ongoingGame = games[games.length-1];
+        ongoingGame.startGame();
         ongoingGame.players.push(socket);
         ongoingGame.players.forEach(player => {
-          player.emit(enums.socketEvents.GAMESTARTED,"Make a move");
+          let playerID = ongoingGame.players.indexOf(player);
+          let opponentName = ongoingGame.players[1-playerID].username;
+          player.emit(enums.socketEvents.GAMESTARTED, {msg:"Make a move", playerID:playerID, opponent:opponentName});
         })
     }
   });
@@ -70,9 +73,11 @@ io.on(enums.socketEvents.CONNECTION, (socket) => {
   //player made a move
   socket.on(enums.socketEvents.MOVEMADE,(move) => {
     let currentGame = getGameByPlayer(socket);
+    if(!currentGame)
+      return;
     let outcome = currentGame.registerMove(socket,move);
     currentGame.players.forEach(player => {
-      player.emit(enums.socketEvents.MOVESTATE,{outcome:outcome, scores:currentGame.scores});
+      player.emit(enums.socketEvents.MOVESTATE,{move:outcome.move,serving:outcome.serving, scores:currentGame.scores});
     });
   });
 });

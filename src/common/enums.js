@@ -10,6 +10,7 @@ const moveStatus = {
     FINISHED: 'Finished',
 }
 const gameStatus = {
+    NOTSTARTED: "Not Started",
     INPROGRESS: "In Progress",
     FINISHED: "Finished"
 }
@@ -20,7 +21,7 @@ const socketEvents = {
     NEWGAME: "new game",
     NEWPLAYER: "new player",
     GAMESTARTED: "game started",
-    CREATED: "joined",
+    CREATED: "created",
     MOVEMADE: "move made",
     MOVESTATE: "move state"
 }

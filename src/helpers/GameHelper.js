@@ -4,23 +4,29 @@ class Game {
     {
         this.players = [];// list of sockets
         this.scores = [0,0];
-        this.gameStatus = enums.gameStatus.INPROGRESS;
+        this.gameStatus = enums.gameStatus.NOTSTARTED;
         //ballDirection indicates from which player the ball is going (who is the "attacker")
         this.ballDirection = 0;
         this.attacking = enums.position.UNDECIDED;
         this.defending = enums.position.UNDECIDED;
     }
+    startGame = () => {
+        this.gameStatus = enums.gameStatus.INPROGRESS;
+    }
     registerMove = (player,position) => {
+        if(this.gameStatus !== enums.gameStatus.INPROGRESS)
+            return {move:this.gameStatus,serving:this.ballDirection};
         let index = this.players.indexOf(player);
         if(this.ballDirection==index)
             this.attacking = position;
         else
             this.defending = position;
-        return this.concludeMove();
+        return {move:this.concludeMove(),serving:this.ballDirection};
     }
     concludeMove = () => {
         if(this.attacking==enums.position.UNDECIDED || this.defending==enums.position.UNDECIDED)
             return enums.moveStatus.AWAITING;
+
         let scored = enums.moveStatus.CONTINUE;
         if(this.attacking == this.defending)
             this.ballDirection = 1 - this.ballDirection;
@@ -34,7 +40,6 @@ class Game {
         this.scores[index]++;
         if(this.scores[index]===5 || (this.scores[index]===4 && this.scores[1-index]<=2))
         {
-            //Game won by "player"
             this.gameStatus = enums.gameStatus.FINISHED
             return enums.moveStatus.FINISHED;
         }
